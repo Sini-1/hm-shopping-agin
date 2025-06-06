@@ -9,7 +9,7 @@ import SearchList from '@/views/search/list.vue'
 import Prodetail from '@/views/prodetail'
 import Home from '@/views/layout/home.vue'
 import Cart from '@/views/layout/cart.vue'
-import Category from '@/views/layout/caregory.vue'
+import Category from '@/views/layout/category.vue'
 import User from '@/views/layout/user.vue'
 
 Vue.use(VueRouter)
