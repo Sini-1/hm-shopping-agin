@@ -6,7 +6,6 @@ export const getPicCode = () => {
 
 // export const getSmsCode = (captchaCode, captchaKey, mobile) => {
 //   request.post('/captcha/sendSmsCaptcha', {
-//     // captchaCode, captchaKey, mobile
 //     form: {
 //       captchaCode,
 //       captchaKey,
@@ -20,6 +19,18 @@ export const getSmsCode = (obj) => {
       captchaCode: obj.chuanPicCode,
       captchaKey: obj.chuanPicKey,
       mobile: obj.chuanMobile
+    }
+  })
+}
+
+export const codeLogin = (mobile, msgCode) => {
+  return request.post('/passport/login', {
+    form: {
+      isParty: false,
+      // mobile: mobile,
+      mobile,
+      partyData: {},
+      smsCode: msgCode
     }
   })
 }

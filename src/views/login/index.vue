@@ -17,19 +17,19 @@
           <img v-if="picUrl" :src="picUrl" @click="getPicCode" alt="">
         </div>
         <div class="form-item">
-          <input class="inp" placeholder="请输入短信验证码" type="text">
+          <input v-model="msgCode" class="inp" maxlength="6" placeholder="请输入短信验证码" type="text">
           <button @click="getCode">{{second === totalSecond? '获取验证码' : second+'秒后重新发送'}}</button>
         </div>
        </div>
 
        <!-- 登录 -->
-     <div class="login-btn">登录</div>
+     <div class="login-btn" @click="mobilelogin">登录</div>
     </div>
 </div>
 </template>
 
 <script>
-import { getPicCode, getSmsCode } from '@/api/getloginApi.js'
+import { getPicCode, getSmsCode, codeLogin } from '@/api/getloginApi.js'
 
 export default {
   name: 'LoginIndex',
@@ -41,7 +41,8 @@ export default {
       totalSecond: 60,
       second: 60,
       timer: null,
-      mobile: '' // 手机号
+      mobile: '', // 手机号
+      msgCode: '' // 手机验证码
     }
   },
   async created () {
@@ -83,7 +84,7 @@ export default {
         await getSmsCode(obj)
         this.$toast('发送成功，请注意查收')
         // 如果符合条件就开启倒计时
-        setInterval(() => {
+        this.timer = setInterval(() => {
           this.second--
           if (this.second < 1) {
             clearInterval(this.timer)
@@ -94,6 +95,19 @@ export default {
         // 发送请求成功，获取验证码
         this.$toast('发送成功，请注意查收')
       }
+    },
+    async mobilelogin () {
+      // 再来一遍校验
+      if (!this.validFn()) {
+        return
+      }
+      if (!/^\d{6}$/.test(this.msgCode)) {
+        this.$toast('请输入正确的手机验证码')
+        return
+      }
+      await codeLogin(this.mobile, this.msgCode)
+      this.$router.push('/')
+      this.$toast('登录成功')
     }
   },
   destroyed () {
