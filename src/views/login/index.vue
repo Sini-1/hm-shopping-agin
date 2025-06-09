@@ -10,7 +10,7 @@
       <!-- 设置表单 -->
        <div class="form">
         <div class="form-item">
-          <input class="inp" maxlength="11" placeholder="请输入手机号码" type="text">
+          <input v-model="mobile" class="inp" maxlength="11" placeholder="请输入手机号码" type="text">
         </div>
         <div class="form-item">
           <input v-model="picCode" class="inp" maxlength="5" placeholder="请输入图形验证码" type="text">
@@ -18,7 +18,7 @@
         </div>
         <div class="form-item">
           <input class="inp" placeholder="请输入短信验证码" type="text">
-          <button>获取验证码</button>
+          <button @click="getCode">{{second === totalSecond? '获取验证码' : second+'秒后重新发送'}}</button>
         </div>
        </div>
 
@@ -29,15 +29,19 @@
 </template>
 
 <script>
-import { getPicCode } from '@/api/getPicCodeApi.js'
+import { getPicCode, getSmsCode } from '@/api/getloginApi.js'
 
 export default {
   name: 'LoginIndex',
   data () {
     return {
-      picCode: '',
-      picKey: '',
-      picUrl: ''
+      picCode: '', // 图形验证码
+      picKey: '', // 图片的唯一标识
+      picUrl: '', // 图片的64位 转换过来就是地址
+      totalSecond: 60,
+      second: 60,
+      timer: null,
+      mobile: '' // 手机号
     }
   },
   async created () {
@@ -51,7 +55,49 @@ export default {
       this.picUrl = base64
       this.picKey = key
       this.$toast('nihao1')
+    },
+    validFn () {
+      if (!/^1[3-9]\d{9}$/.test(this.mobile)) {
+        // \d  0-9之间一个任意数字，相当于[0-9]
+        this.$toast('请输入正确的手机号')
+        return false
+      }
+      if (!/^\w{4}$/.test(this.picCode)) {
+        this.$toast('请输入正确的图形验证码')
+        return false
+      }
+      return true
+    },
+    async getCode () {
+      if (!this.validFn()) {
+        // 通过校验就继续往下执行，没通过就return
+        return
+      }
+      if (!this.timer && this.second === this.totalSecond) {
+        // 发送请求，获取验证码
+        const obj = {
+          chuanPicCode: this.picCode,
+          chuanPicKey: this.picKey,
+          chuanMobile: this.mobile
+        }
+        await getSmsCode(obj)
+        this.$toast('发送成功，请注意查收')
+        // 如果符合条件就开启倒计时
+        setInterval(() => {
+          this.second--
+          if (this.second < 1) {
+            clearInterval(this.timer)
+            this.timer = null
+            this.second = this.totalSecond
+          }
+        }, 1000)
+        // 发送请求成功，获取验证码
+        this.$toast('发送成功，请注意查收')
+      }
     }
+  },
+  destroyed () {
+    clearInterval(this.timer)
   }
 }
 </script>
