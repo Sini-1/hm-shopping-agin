@@ -11,6 +11,7 @@ import Home from '@/views/layout/home.vue'
 import Cart from '@/views/layout/cart.vue'
 import Category from '@/views/layout/category.vue'
 import User from '@/views/layout/user.vue'
+import store from '@/store/index'
 
 Vue.use(VueRouter)
 
@@ -31,8 +32,26 @@ const router = new VueRouter({
     { path: '/pay', component: Pay },
     { path: '/search', component: Search },
     { path: '/searchlist', component: SearchList },
-    { path: '/prodetail', component: Prodetail }
+    { path: '/prodetail/:id', component: Prodetail }
   ]
+})
+
+// 定义一个数组，专门存放用户所有需要权限访问的页面
+const authUrls = ['/pay', '/myorder']
+
+router.beforeEach((to, from, next) => {
+  if (!authUrls.includes(to.path)) {
+    // 如果要跳转的路径在authUrls中没出现过，就放行
+    next()
+    return
+  }
+  const token = store.getters.token
+  console.log(token)
+  if (token) {
+    next()
+  } else {
+    next('/login')
+  }
 })
 
 export default router

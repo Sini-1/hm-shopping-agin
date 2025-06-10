@@ -10,6 +10,13 @@ const instance = axios.create({
 // 添加请求拦截器
 instance.interceptors.request.use(function (config) {
   // 在发送请求之前做些什么
+  // toast是单例调用，只允许一个toast存在，如需要多例模式，查官网
+  Toast.loading({
+    message: '加载中...',
+    forbidClick: true, // 禁止点击loading后面的背景
+    loadingType: 'spinner', // 配置loading图标
+    duration: 0 // 不会自动消失，直到响应数据回来，在拦截器里清除loading
+  })
   return config
 }, function (error) {
   // 对请求错误做些什么
@@ -25,6 +32,8 @@ instance.interceptors.response.use(function (response) {
   if (res.status !== 200) {
     Toast(res.message)
     return Promise.reject(res.message)
+  } else {
+    Toast.clear()
   }
   return res
 }, function (error) {

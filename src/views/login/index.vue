@@ -53,6 +53,7 @@ export default {
       // const res = await request.get('/captcha/image')
       const { data: { base64, key } } = await getPicCode()
       // console.log(res)
+      // console.log(res)
       this.picUrl = base64
       this.picKey = key
       this.$toast('nihao1')
